@@ -5,5 +5,25 @@
 }
 a {
   text-decoration: none !important;
-  color: inherit !important;
+}
+
+body {
+  background-color: #1e272e !important;
+  color: #fafafa !important;
+  font-family: "Geologica", sans-serif !important;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-size: 16px !important;
+}
+
+.card-custom {
+  background-color: #485460 !important;
+  border-radius: 15px;
+  height: 600px !important;
+}
+.card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
