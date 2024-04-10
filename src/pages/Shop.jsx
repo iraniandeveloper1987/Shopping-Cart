@@ -3,10 +3,13 @@ import { Row, Col, Spinner, Container } from "react-bootstrap";
 import Product from "../components/Product";
 import { productList } from "../data/Items";
 import productService from "../services/ProductsData";
+import { useCart } from "../context/CartContext";
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const { state } = useCart();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -26,13 +29,19 @@ const Shop = () => {
         {loading ? (
           <Col align="center">
             <Spinner
-              animation="border"
+              animation="grow"
               role="status"
               align="center"
               className="justify-content-center align-items-center "
             >
               <span className="visually-hidden text-light ">Loading...</span>
             </Spinner>
+            <span
+              className=" text-light fs-3 
+             "
+            >
+              Loading...
+            </span>
           </Col>
         ) : (
           products.map((item) => {
