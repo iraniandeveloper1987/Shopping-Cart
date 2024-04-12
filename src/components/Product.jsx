@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
 import { useCart } from "../context/CartContext";
+import { FaTrashAlt } from "react-icons/fa";
+import { FaCartPlus } from "react-icons/fa6";
 
 const Product = ({ product }) => {
   const { state, dispatch, getQuantityById } = useCart();
@@ -11,7 +13,9 @@ const Product = ({ product }) => {
   const handelRemoveFromCard = () => {
     dispatch({ type: "Remove_from_Cart", payload: product.id });
   };
-
+  const handelDeleteFromCart = () => {
+    dispatch({ type: "Delete_From_Card", payload: product.id });
+  };
   return (
     <Card className="mt-5 card-custom ">
       <Card.Body>
@@ -26,7 +30,7 @@ const Product = ({ product }) => {
           {product.title}
         </Card.Title>
         <Card.Text align="center" className="text-light fs-4 fw-bold  ">
-          <span>{`$ ${product.price}`}</span>
+          <span>{`$ ${Math.floor(product.price)}`}</span>
         </Card.Text>
         {getQuantityById(product.id) === 0 ? (
           <Button
@@ -34,28 +38,37 @@ const Product = ({ product }) => {
             className="text-white "
             onClick={handelAddToCard}
           >
-            Add to cart
+            <span className="p3">Add to cart</span> <FaCartPlus />
           </Button>
         ) : (
-          <div className="d-flex gap-3 justify-content-center align-items-center ">
+          <>
+            <div className="d-flex gap-3 justify-content-center align-items-center ">
+              <Button
+                variant="btn btn-outline-success"
+                className="text-white "
+                onClick={handelAddToCard}
+              >
+                +
+              </Button>
+              <span className="fs-3 fw-bold text-light">
+                {getQuantityById(product.id)}
+              </span>
+              <Button
+                variant="btn btn-outline-danger"
+                className="text-white"
+                onClick={handelRemoveFromCard}
+              >
+                -
+              </Button>
+            </div>
             <Button
-              variant="btn btn-outline-success"
-              className="text-white "
-              onClick={handelAddToCard}
+              variant="danger"
+              className="mt-2"
+              onClick={handelDeleteFromCart}
             >
-              +
+              <span className="px-2">Remove from Cart</span> <FaTrashAlt />
             </Button>
-            <span className="fs-3 fw-bold text-light">
-              {getQuantityById(product.id)}
-            </span>
-            <Button
-              variant="btn btn-outline-danger"
-              className="text-white"
-              onClick={handelRemoveFromCard}
-            >
-              -
-            </Button>
-          </div>
+          </>
         )}
       </Card.Body>
     </Card>

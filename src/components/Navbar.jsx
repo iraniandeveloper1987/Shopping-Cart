@@ -6,14 +6,23 @@ import {
   Badge,
   Modal,
 } from "react-bootstrap";
+import productService from "../services/ProductsData";
 import { BsCart } from "react-icons/bs";
+
 import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const { state, dispatch } = useCart();
   const [showCart, setShowCart] = useState(false);
+
   const handleClose = () => setShowCart(false);
   const handleShow = () => setShowCart(true);
+  const handelAddToCard = (productId) => {
+    dispatch({ type: "Add_To_Cart", payload: productId });
+  };
+  const handelRemoveFromCard = (productId) => {
+    dispatch({ type: "Remove_from_Cart", payload: productId });
+  };
 
   return (
     <>
@@ -52,15 +61,50 @@ const Navbar = () => {
           <Modal.Title>Shopping Cart</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-dark text-center ">
-          Your cart is Empty!
+          {state.cartItems.length === 0 ? (
+            <span>Your cart is Empty!</span>
+          ) : (
+            state.cartItems.map((item) => {
+              const product = state.allProducts.find((p) => p.id === item.id);
+              return (
+                <div hey={item.id} className="my-3 w-100 ">
+                  <span>{`($ ${Math.floor(product.price)} )`} </span>
+                  <img
+                    src={product.image}
+                    alt="productImage"
+                    className=" px-3"
+                    style={{ width: 100, height: 100 }}
+                  />
+
+                  <Button
+                    variant="success"
+                    className="px-3"
+                    onClick={() => handelAddToCard(item.id)}
+                  >
+                    +
+                  </Button>
+                  <span className="px-3 fs-4 fw-bold ">{item.quantity}</span>
+                  <Button
+                    variant="danger"
+                    className="px-3"
+                    onClick={() => handelRemoveFromCard(item.id)}
+                  >
+                    -
+                  </Button>
+                </div>
+              );
+            })
+          )}
         </Modal.Body>
         <Modal.Footer>
+          <span className="text-dark mx-auto ">
+            {" "}
+            Total : $ {Math.floor(state.totalPrice)}
+          </span>
           <Button variant="danger" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant="success" onClick={handleClose}>
-            Checkout
-          </Button>
+          <Button variant="success">Checkout</Button>
         </Modal.Footer>
       </Modal>
     </>

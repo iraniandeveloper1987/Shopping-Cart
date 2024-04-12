@@ -3,12 +3,16 @@ import productService from "../services/ProductsData";
 const CartContext = createContext();
 
 const initialState = {
+  allProducts: [],
   cartItems: [],
   totalCount: 0,
   totalPrice: 0,
 };
 
 const cardReducer = (state, action) => {
+  const productData = state.allProducts.find(
+    (item) => item.id === action.payload
+  );
   switch (action.type) {
     case "Add_To_Cart": {
       const item = state.cartItems.find((item) => item.id === action.payload);
@@ -18,6 +22,7 @@ const cardReducer = (state, action) => {
           ...state,
           cartItems: [...state.cartItems, { id: action.payload, quantity: 1 }],
           totalCount: state.totalCount + 1,
+          totalPrice: state.totalPrice + (Math.floor(productData.price) || 0),
         };
       } else {
         return {
@@ -28,6 +33,7 @@ const cardReducer = (state, action) => {
               : item
           ),
           totalCount: state.totalCount + 1,
+          totalPrice: state.totalPrice + (Math.floor(productData.price) || 0),
         };
       }
     }
@@ -42,26 +48,27 @@ const cardReducer = (state, action) => {
               : item
           ),
           totalCount: state.totalCount - 1,
+          totalPrice: state.totalPrice - (Math.floor(productData.price) || 0),
         };
       }
       return {
         ...state,
-        cartItems: state.cartItems.filter((item) => item.id !== action.payload),
+        cartItems: state.cartItems.filter((item) => item.id != action.payload),
+        totalPrice:
+          state.totalPrice -
+          (Math.floor(productData.price) || 0) * item.quantity,
       };
-
-      //----------------------------------------------------------------------------------
-      // return {
-      //   ...state,
-      //   cartItems: state.cartItems.map((item) =>
-      //     item.id === action.payload && item.quantity > 1
-      //       ? { ...cartItems, quantity: item.quantity - 1 }
-      //       : state.cartItems.filter((item) => item.id !== action.payload)
-      //   ),
-      // };
-      //-------------------------------------------------------------------------------------
     }
 
     case "Delete_From_Card": {
+      const quantity = state.cartItems.find(
+        (item) => item.id === action.payload
+      )?.quantity;
+      return {
+        ...state,
+        cartItems: state.cartItems.filter((item) => item.id != action.payload),
+        totalCount: state.totalCount - quantity,
+      };
       break;
     }
 
@@ -78,7 +85,19 @@ const cardReducer = (state, action) => {
       };
     }
     case "Get_Total_price": {
-      break;
+      // let totalAmount = 0;
+      state.cartItems.map((item) => {
+        const productData = productService.getProductById(item.id);
+        // totalAmount += productData.price * item.quantity;
+        return {
+          ...state,
+          totalPrice: state.totalPrice + productData.price * item.quantity,
+        };
+      });
+    }
+
+    case "Fetch_Products": {
+      return { ...state, allProducts: action.payload.products };
     }
 
     default:
@@ -98,6 +117,22 @@ export const CartProvider = ({ children }) => {
     }
     return quantity;
   };
+
+  useEffect(() => {
+    // Fetch products data when the component mounts
+    productService
+      .getProducts()
+      .then((products) => {
+        // Dispatch action to update allProducts value in state
+        dispatch({
+          type: "Fetch_Products",
+          payload: { products },
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+      });
+  }, []);
 
   return (
     <CartContext.Provider value={{ state, dispatch, getQuantityById }}>
